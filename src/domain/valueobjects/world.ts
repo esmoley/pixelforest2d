@@ -37,6 +37,12 @@ export class World{
         this.instanceMesh.instanceMatrix.needsUpdate = true;
         this.scene.add(this.instanceMesh)
     }
+    getWidth(){
+        return this.width
+    }
+    getHeight(){
+        return this.height
+    }
     resetCells(){
         this.cells = new Array(this.width).fill(null).map(()=>new Array(this.height).fill(null))
     }
