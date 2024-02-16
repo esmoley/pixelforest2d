@@ -21,8 +21,6 @@ export class TreeWorldItem extends WorldItem{
     grow(){
         const activeCells = this.activeCells
         this.activeCells = []
-        console.log({activeCells, genes:this.genes, cells:this.cells})
-        const date = Date.now()
         for(let activeCell of activeCells){
             if(activeCell.gene.left<this.genes.length){
                 const x = this.world.translateX(activeCell.cell.getX()-1)
@@ -65,6 +63,5 @@ export class TreeWorldItem extends WorldItem{
                 }
             }
         }
-        console.log(Date.now()-date)
     }
 }
