@@ -67,19 +67,20 @@ function updateControls(){
 }
 updateControls()
 
+const colors = [0x5B5280,0x6074AB,0x74A0D1,0x95C3E9,0xC0E5F3,0xFAFFE0,0xE3E0D7,0xC3B8B1,0xA39391,0x8D7176,0x6A4C62,0x4E3161,0x421E42,0x612447,0x7A3757,0x96485B,0xBD6868,0xD18B79,0xDBAC8C,0xE6CFA1,0xE7EBBC,0xB2DBA0,0x87C293,0x70A18F,0x637C8F,0xB56E75,0xC98F8F,0xDFB6AE,0xEDD5CA,0xBD7182,0x9E5476,0x753C6A]
 //#endregion controls
-
+function randomColor(){
+  return colors[Math.floor(Math.random()*(colors.length-1))]
+}
 function resetWorld(){
   world.reset()
   const randomX = ()=> Math.floor(Math.random()*world.getWidth())
   const randomY = ()=> Math.floor(Math.random()*(world.getHeight()/4))
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0xEBD1E8), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0xD3678D), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0xEEA4CA), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0xA6DDE8), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0x9597BA), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0xB7ABCE), randomX(),randomY()), new TreeGeneGenerator().generate())
-  new TreeWorldItem(world, new WorldCell(new THREE.Color(0x20749E), randomX(),randomY()), new TreeGeneGenerator().generate())
+  const addTree = (color:THREE.Color) =>new TreeWorldItem(world, new WorldCell(color, randomX(),randomY()), new TreeGeneGenerator().generate())
+  for (let i=0;i<32;i++)
+  {
+    addTree(new THREE.Color(randomColor()))  
+  }
 }
 resetWorld()
 function animate() {
