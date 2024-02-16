@@ -44,7 +44,7 @@ export class TreeWorldItem extends WorldItem{
             }
             if(activeCell.gene.up<this.genes.length){
                 const x = activeCell.cell.getX()
-                const y = activeCell.cell.getY()+1
+                const y = this.world.translateY(activeCell.cell.getY()+1)
                 if(this.world.isCellEmpty(x, y) && this.cells.find(c=>c.getX()==x && c.getY() == y)==null){
                     const cell = new WorldCell(this.cells[0].color, x, y)
                     const gene = this.genes[activeCell.gene.up]
@@ -54,7 +54,7 @@ export class TreeWorldItem extends WorldItem{
             }
             if(activeCell.gene.down<this.genes.length){
                 const x = activeCell.cell.getX()
-                const y = activeCell.cell.getY()-1
+                const y = this.world.translateY(activeCell.cell.getY()-1)
                 if(this.world.isCellEmpty(x, y) && this.cells.find(c=>c.getX()==x && c.getY() == y)==null){
                     const cell = new WorldCell(this.cells[0].color, x, y)
                     const gene = this.genes[activeCell.gene.down]
