@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
+const initialWidth = 256;
+const initialHeight = 128;
 export interface SceneState {
+  width:number,
+  height:number,
   lifetime:number,
   speed:number,
   lastUpdate:number,
@@ -11,13 +15,15 @@ export interface SceneState {
 }
 
 const initialState: SceneState = {
-    lifetime: 0,
-    speed:1,
-    lastUpdate:0,
-    started:false,
-    worldResetRequested:true,
-    lockY:true,
-    lockX:false,
+  width:initialWidth,
+  height:initialHeight,
+  lifetime: 0,
+  speed:1,
+  lastUpdate:0,
+  started:false,
+  worldResetRequested:true,
+  lockY:true,
+  lockX:false
 }
 
 export const sceneSlice = createSlice({
@@ -56,7 +62,7 @@ export const {
   setStarted,
   setWorldResetRequested,
   setLockX,
-  setLockY
+  setLockY,
 } = sceneSlice.actions
 
 export default sceneSlice.reducer
