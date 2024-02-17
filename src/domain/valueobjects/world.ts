@@ -8,7 +8,8 @@ export class World{
     private height: number = 128;
     public grid?:Grid;
     public cells: WorldCell[][] | null[][];
-    private lockVertically = false
+    public lockY = false
+    public lockX = false
     worldItems:WorldItem[] = []
 
     private instanceMesh:THREE.InstancedMesh;
@@ -96,18 +97,20 @@ export class World{
         this.worldItems.length = 0
     }
     translateX(x:number){
+        if(this.lockX)return x
         while(x<0)x+=this.width;
         while(x>=this.width)x-=this.width
         return x
     }
     translateY(y:number){
-        if(!this.lockVertically)return y
+        if(this.lockY)return y
         while(y<0)y+=this.height
         while(y>=this.height)y-=this.height
         return y
     }
     isCellEmpty(x:number, y:number){
-        if(!this.lockVertically && (y<0 || y>= this.height)) return false;
+        if(this.lockY && (y<0 || y>= this.height)) return false;
+        if(this.lockX && (x<0 || x>= this.width)) return false;
         return this.cells[x][y]==null
     }
 }

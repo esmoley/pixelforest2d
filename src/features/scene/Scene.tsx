@@ -26,6 +26,8 @@ export const Scene = ({width, height} :{width:number, height:number})=>{
   //const speed = useAppSelector(x=>x.scene.speed)
   const started = useAppSelector(x=>x.scene.started)
   const worldResetRequested = useAppSelector(x=>x.scene.worldResetRequested)
+  const lockX = useAppSelector(x=>x.scene.lockX)
+  const lockY = useAppSelector(x=>x.scene.lockY)
 
   const requestRef = useRef(0)
   const previousTimeRef = useRef(0);
@@ -61,6 +63,12 @@ export const Scene = ({width, height} :{width:number, height:number})=>{
     camera.position.y = 64;
     camera.position.z = 1;
   },[])
+  useEffect(()=>{
+    world.lockX = lockX
+  },[lockX])
+  useEffect(()=>{
+    world.lockY = lockY
+  },[lockY])
 
   useEffect(()=>{
     requestRef.current = requestAnimationFrame(animate);

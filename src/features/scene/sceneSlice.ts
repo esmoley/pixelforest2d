@@ -6,6 +6,8 @@ export interface SceneState {
   nextUpdate:number,
   started:boolean,
   worldResetRequested:boolean,
+  lockY:boolean,
+  lockX:boolean
 }
 
 const initialState: SceneState = {
@@ -13,7 +15,9 @@ const initialState: SceneState = {
     speed:0,
     nextUpdate:0,
     started:false,
-    worldResetRequested:true
+    worldResetRequested:true,
+    lockY:true,
+    lockX:false,
 }
 
 export const sceneSlice = createSlice({
@@ -35,7 +39,13 @@ export const sceneSlice = createSlice({
     },
     setWorldResetRequested: (state, action:PayloadAction<boolean>) => {
       state.worldResetRequested = action.payload
-  },
+    },
+    setLockX: (state, action:PayloadAction<boolean>) => {
+      state.lockX = action.payload
+    },
+    setLockY: (state, action:PayloadAction<boolean>) => {
+      state.lockY = action.payload
+    },
   },
 })
 
@@ -44,7 +54,9 @@ export const {
   setSpeed,
   setNextUpdate,
   setStarted,
-  setWorldResetRequested
+  setWorldResetRequested,
+  setLockX,
+  setLockY
 } = sceneSlice.actions
 
 export default sceneSlice.reducer

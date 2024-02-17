@@ -1,14 +1,34 @@
 import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { Scene } from "./features/scene/Scene"
-import { setLifetime, setStarted, setWorldResetRequested } from "./features/scene/sceneSlice"
+import { setLifetime, setLockX, setLockY, setStarted, setWorldResetRequested } from "./features/scene/sceneSlice"
 
 export const App = () =>{
     const dispatch = useAppDispatch()
+
     const started = useAppSelector(x=>x.scene.started)
     const lifetime = useAppSelector(x=>x.scene.lifetime)
+    const lockX = useAppSelector(x=>x.scene.lockX)
+    const lockY = useAppSelector(x=>x.scene.lockY)
     return <>
         <div className="flex justify-center pt-2" style={{height:"65px", backgroundColor:"#222222", color:"aliceblue"}}>
-            <div className="flex-1"></div>
+            <div className="flex-1">
+                <div className="flex justify-start">
+                    <div style={{display:"block", fontFamily:'ReceiptionalReceipt'}} className="m-1 ml-1 cursor-pointer"
+                        onClick={()=>dispatch(setLockX(!lockX))}
+                    >
+                        <div className="bg-slate-900 p-1 border-slate-500 border" style={{width: "fit-content", minWidth:"161.88px"}}>
+                            <span className="text-2xl" >lock X:{lockX?"on":"off"}</span>
+                        </div>
+                    </div>
+                    <div style={{display:"block", fontFamily:'ReceiptionalReceipt'}} className="m-1 ml-3 cursor-pointer"
+                        onClick={()=>dispatch(setLockY(!lockY))}
+                    >
+                        <div className="bg-slate-900 p-1 border-slate-500 border" style={{width: "fit-content", minWidth:"161.88px"}}>
+                            <span className="text-2xl" >lock Y:{lockY?"on":"off"}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="flex-initial">
                 <button
                     disabled={started}
