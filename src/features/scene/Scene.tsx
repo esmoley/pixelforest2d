@@ -5,7 +5,7 @@ import { WorldCell } from '../../domain/entites/world/world.cell';
 import { TreeGeneGenerator } from '../../domain/generators/tree_gene_generator';
 import { useEffect, useMemo, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { setLifetime, setWorldResetRequested } from './sceneSlice';
+import { setLastUpdate, setLifetime, setStarted, setWorldResetRequested } from './sceneSlice';
 
 const colors = [0x5B5280,0x6074AB,0x74A0D1,0x95C3E9,0xC0E5F3,0xFAFFE0,0xE3E0D7,0xC3B8B1,0xA39391,0x8D7176,0x6A4C62,0x4E3161,0x421E42,0x612447,0x7A3757,0x96485B,0xBD6868,0xD18B79,0xDBAC8C,0xE6CFA1,0xE7EBBC,0xB2DBA0,0x87C293,0x70A18F,0x637C8F,0xB56E75,0xC98F8F,0xDFB6AE,0xEDD5CA,0xBD7182,0x9E5476,0x753C6A]
 const scale = 10
@@ -17,13 +17,11 @@ const randomColor = () => {
   }
   return colorsCache[color]
 }
-
 export const Scene = ({width, height} :{width:number, height:number})=>{
   const dispatch = useAppDispatch()
-
   const lifetime = useAppSelector(x=>x.scene.lifetime)
-  //const nextUpdate = useAppSelector(x=>x.scene.nextUpdate)
-  //const speed = useAppSelector(x=>x.scene.speed)
+  const lastUpdate = useAppSelector(x=>x.scene.lastUpdate)
+  const speed = useAppSelector(x=>x.scene.speed)
   const started = useAppSelector(x=>x.scene.started)
   const worldResetRequested = useAppSelector(x=>x.scene.worldResetRequested)
   const lockX = useAppSelector(x=>x.scene.lockX)
@@ -45,15 +43,24 @@ export const Scene = ({width, height} :{width:number, height:number})=>{
     //   setCount(prevCount => (prevCount + deltaTime * 0.01) % 100);
     
     //}
+    if (previousTimeRef.current == undefined){
+      renderer.render( world.scene, camera );
+    }
     previousTimeRef.current = time;
     requestRef.current = requestAnimationFrame(animate);
 
     if(started){
-      dispatch(setLifetime(lifetime+1));
-      
-      world.update()
+      const deltaTime = Date.now()-lastUpdate
+      if(deltaTime * ((speed/2)* 0.01)>=1){
+        dispatch(setLastUpdate(Date.now()))
+        dispatch(setLifetime(lifetime+1));
+        world.update()
+        if(world.inactivity>5){
+          dispatch(setStarted(false))
+        }
+        //renderer.render( world.scene, camera );
+      }
     }
-    renderer.render( world.scene, camera );
   }
   useEffect(()=>{
     world.addGrid();
@@ -69,7 +76,12 @@ export const Scene = ({width, height} :{width:number, height:number})=>{
   useEffect(()=>{
     world.lockY = lockY
   },[lockY])
-
+  useEffect(()=>{
+    world.speed = speed
+  },[speed])
+  useEffect(()=>{
+    renderer.render( world.scene, camera );
+  },[started, lifetime])
   useEffect(()=>{
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
@@ -85,6 +97,7 @@ export const Scene = ({width, height} :{width:number, height:number})=>{
       addTree(randomColor())
     }
     dispatch(setWorldResetRequested(false))
+    renderer.render( world.scene, camera );
   },[worldResetRequested])
   
   return <></>

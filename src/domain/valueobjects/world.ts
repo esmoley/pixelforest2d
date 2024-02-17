@@ -10,7 +10,9 @@ export class World{
     public cells: WorldCell[][] | null[][];
     public lockY = false
     public lockX = false
+    public speed = 1
     worldItems:WorldItem[] = []
+    public inactivity = 0
 
     private instanceMesh:THREE.InstancedMesh;
     private initialColor = new THREE.Color(0x000000)
@@ -21,7 +23,7 @@ export class World{
     constructor(public scene:THREE.Scene){
         this.cells = new Array(this.width).fill(null).map(()=>new Array(this.height).fill(null))
         this.instanceMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(), new THREE.MeshBasicMaterial(), this.width*this.height)
-        this.instanceMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage )
+        this.instanceMesh.instanceMatrix.setUsage( THREE.StaticDrawUsage )
         let meshIndex = 0
         for(let x=0;x<this.width;x++){
             for(let y=0;y<this.height;y++){
@@ -70,17 +72,25 @@ export class World{
     }
     private paint(){
         let meshIndex = 0;
-        const dummyColor = new THREE.Color(0x000000)
+        let dummyColor = new THREE.Color(0x000000)
+        let inactive = true
         for(let x=0;x<this.width;x++){
             for(let y=0;y<this.height;y++){
                 this.instanceMesh.getColorAt(meshIndex, dummyColor)
-                if(!this.cells[x][y] && dummyColor!=this.initialColor){
+                if(!this.cells[x][y] && !dummyColor.equals(this.initialColor)){
                     this.instanceMesh.setColorAt(meshIndex, this.initialColor)
-                }else if(this.cells[x][y]?.color!= dummyColor){
+                    inactive = false
+                }else if(this.cells[x][y] && !this.cells[x][y]?.color.equals(dummyColor)){
                     this.instanceMesh.setColorAt(meshIndex, this.cells[x][y]?.color as THREE.Color)
+                    inactive = false
                 }
                 meshIndex++
             }
+        }
+        if(inactive){
+            this.inactivity++
+            console.log(this.inactivity)
+            return
         }
         if(this.instanceMesh.instanceColor)this.instanceMesh.instanceColor.needsUpdate = true
     }
@@ -95,6 +105,7 @@ export class World{
             y.dispose()
         }))
         this.worldItems.length = 0
+        this.inactivity = 0
     }
     translateX(x:number){
         if(this.lockX)return x

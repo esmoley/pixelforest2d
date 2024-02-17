@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 export interface SceneState {
   lifetime:number,
   speed:number,
-  nextUpdate:number,
+  lastUpdate:number,
   started:boolean,
   worldResetRequested:boolean,
   lockY:boolean,
@@ -12,8 +12,8 @@ export interface SceneState {
 
 const initialState: SceneState = {
     lifetime: 0,
-    speed:0,
-    nextUpdate:0,
+    speed:1,
+    lastUpdate:0,
     started:false,
     worldResetRequested:true,
     lockY:true,
@@ -31,8 +31,8 @@ export const sceneSlice = createSlice({
     setSpeed: (state, action:PayloadAction<number>) => {
         state.speed = action.payload
     },
-    setNextUpdate: (state, action:PayloadAction<number>) => {
-        state.nextUpdate = action.payload
+    setLastUpdate: (state, action:PayloadAction<number>) => {
+        state.lastUpdate = action.payload
     },
     setStarted: (state, action:PayloadAction<boolean>) => {
         state.started = action.payload
@@ -52,7 +52,7 @@ export const sceneSlice = createSlice({
 export const {
   setLifetime,
   setSpeed,
-  setNextUpdate,
+  setLastUpdate,
   setStarted,
   setWorldResetRequested,
   setLockX,
