@@ -18,6 +18,7 @@ export interface Cell {
   color: number;
   x: number;
   y: number;
+  strength: number;
 }
 
 const colors = [
@@ -101,10 +102,10 @@ export const World = ({scene, render}: FieldProps) => {
     while (y >= height) y -= height;
     return y;
   };
-  const isCellEmpty = (x: number, y: number) => {
+  const canGrow = (x: number, y: number, strength: number) => {
     if (lockY && (y < 0 || y >= height)) return false;
     if (lockX && (x < 0 || x >= width)) return false;
-    return cells[x][y] == null;
+    return cells[x][y] == null; // || cells[x][y]!.strength<strength;
   };
   const paint = (): void => {
     let meshIndex = 0;
@@ -152,11 +153,16 @@ export const World = ({scene, render}: FieldProps) => {
     if (lifetime !== 0) return;
     const randomX = (): number => Math.floor(Math.random() * width);
     const randomY = (): number => Math.floor(Math.random() * (height / 4));
-    const newTrees = [];
+    const newTrees: TreeState[] = [];
     for (let i = 0; i < 32; i++) {
       newTrees.push({
         key: Math.random(),
-        initialCell: {color: randomColor(), x: randomX(), y: randomY()},
+        initialCell: {
+          color: randomColor(),
+          x: randomX(),
+          y: randomY(),
+          strength: Math.floor(Math.random() * 32),
+        },
         genes: new TreeGeneGenerator().generate(),
       });
     }
@@ -185,7 +191,7 @@ export const World = ({scene, render}: FieldProps) => {
           initialCell={tree.initialCell}
           genes={tree.genes}
           key={tree.key}
-          isCellEmpty={isCellEmpty}
+          canGrow={canGrow}
           translateX={translateX}
           translateY={translateY}
           cells={cells}

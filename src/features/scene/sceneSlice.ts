@@ -19,7 +19,7 @@ const initialState: SceneState = {
   width: initialWidth,
   height: initialHeight,
   lifetime: 0,
-  speed: 1,
+  speed: 7,
   lastUpdate: 0,
   started: false,
   worldResetRequested: true,

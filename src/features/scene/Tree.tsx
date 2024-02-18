@@ -12,9 +12,9 @@ interface ActiveTreeCell {
   cell: Cell;
   gene: TreeGene;
 }
-const isGrounded = (cell: Cell, field: Array<Array<Cell | null>>) => {
-  if (cell.y === 0) return true;
-  return field[cell.x][cell.y - 1] != null;
+const isGrounded = (haystack: Cell, heap: Array<Array<Cell | null>>) => {
+  if (haystack.y === 0) return true;
+  return heap[haystack.x][haystack.y - 1] != null;
 };
 
 export class TreeGeneGenerator {
@@ -31,13 +31,12 @@ export class TreeGeneGenerator {
     return genes;
   }
 }
-
 export interface TreeProps {
   initialCell: Cell;
   genes: TreeGene[];
   translateX: (x: number) => number;
   translateY: (y: number) => number;
-  isCellEmpty: (x: number, y: number) => boolean;
+  canGrow: (x: number, y: number, strength: number) => boolean;
   cells: Array<Array<Cell | null>>;
 }
 export const Tree = ({
@@ -45,7 +44,7 @@ export const Tree = ({
   genes,
   translateX,
   translateY,
-  isCellEmpty,
+  canGrow,
   cells,
 }: TreeProps) => {
   const lifetime = useAppSelector(x => x.scene.lifetime);
@@ -58,67 +57,53 @@ export const Tree = ({
     // empty initial cells
     const newActorCells = actorCells.map(x => x);
 
-    newActorCells.map(itemCell => (cells[itemCell.x][itemCell.y] = null));
+    newActorCells.forEach(itemCell => (cells[itemCell.x][itemCell.y] = null));
 
     // fall if not grounded
     if (!isGrounded(newActorCells[0], cells)) {
       newActorCells.map(c => c.y--);
     } else {
       // otherwise grow
-      const newActiveCells = [];
+      const newActiveCells: ActiveTreeCell[] = [];
+      const grow = (geneIndex: number, x: number, y: number) => {
+        if (geneIndex < genes.length) {
+          if (
+            canGrow(x, y, newActorCells[0].strength) &&
+            newActorCells.find(c => c.x === x && c.y === y) == null
+          ) {
+            const cell: Cell = {
+              color: newActorCells[0].color,
+              x,
+              y,
+              strength: newActorCells[0].strength,
+            };
+            const gene = genes[geneIndex];
+            newActiveCells.push({cell, gene});
+            newActorCells.push(cell);
+          }
+        }
+      };
       for (const activeCell of activeCells) {
-        if (activeCell.gene.left < genes.length) {
-          const x = translateX(activeCell.cell.x - 1);
-          const y = activeCell.cell.y;
-          if (
-            isCellEmpty(x, y) &&
-            newActorCells.find(c => c.x === x && c.y === y) == null
-          ) {
-            const cell: Cell = {color: newActorCells[0].color, x, y};
-            const gene = genes[activeCell.gene.left];
-            newActiveCells.push({cell, gene});
-            newActorCells.push(cell);
-          }
-        }
-        if (activeCell.gene.right < genes.length) {
-          const x = translateX(activeCell.cell.x + 1);
-          const y = activeCell.cell.y;
-          if (
-            isCellEmpty(x, y) &&
-            newActorCells.find(c => c.x === x && c.y === y) == null
-          ) {
-            const cell: Cell = {color: newActorCells[0].color, x, y};
-            const gene = genes[activeCell.gene.right];
-            newActiveCells.push({cell, gene});
-            newActorCells.push(cell);
-          }
-        }
-        if (activeCell.gene.up < genes.length) {
-          const x = activeCell.cell.x;
-          const y = translateY(activeCell.cell.y + 1);
-          if (
-            isCellEmpty(x, y) &&
-            newActorCells.find(c => c.x === x && c.y === y) == null
-          ) {
-            const cell: Cell = {color: newActorCells[0].color, x, y};
-            const gene = genes[activeCell.gene.up];
-            newActiveCells.push({cell, gene});
-            newActorCells.push(cell);
-          }
-        }
-        if (activeCell.gene.down < genes.length) {
-          const x = activeCell.cell.x;
-          const y = translateY(activeCell.cell.y - 1);
-          if (
-            isCellEmpty(x, y) &&
-            newActorCells.find(c => c.x === x && c.y === y) == null
-          ) {
-            const cell: Cell = {color: newActorCells[0].color, x, y};
-            const gene = genes[activeCell.gene.down];
-            newActiveCells.push({cell, gene});
-            newActorCells.push(cell);
-          }
-        }
+        grow(
+          activeCell.gene.left,
+          translateX(activeCell.cell.x - 1),
+          activeCell.cell.y,
+        );
+        grow(
+          activeCell.gene.right,
+          translateX(activeCell.cell.x + 1),
+          activeCell.cell.y,
+        );
+        grow(
+          activeCell.gene.up,
+          activeCell.cell.x,
+          translateY(activeCell.cell.y + 1),
+        );
+        grow(
+          activeCell.gene.down,
+          activeCell.cell.x,
+          translateY(activeCell.cell.y - 1),
+        );
       }
       setActiveCells(newActiveCells);
     }
