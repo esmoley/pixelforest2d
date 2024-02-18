@@ -15,48 +15,21 @@ interface FieldProps {
   render: () => void;
 }
 export interface Cell {
-  color: string;
+  color: number;
   x: number;
   y: number;
 }
 
 const colors = [
-  "#5B5280",
-  "#6074AB",
-  "#74A0D1",
-  "#95C3E9",
-  "#C0E5F3",
-  "#FAFFE0",
-  "#E3E0D7",
-  "#C3B8B1",
-  "#A39391",
-  "#8D7176",
-  "#6A4C62",
-  "#4E3161",
-  "#421E42",
-  "#612447",
-  "#7A3757",
-  "#96485B",
-  "#BD6868",
-  "#D18B79",
-  "#DBAC8C",
-  "#E6CFA1",
-  "#E7EBBC",
-  "#B2DBA0",
-  "#87C293",
-  "#70A18F",
-  "#637C8F",
-  "#B56E75",
-  "#C98F8F",
-  "#DFB6AE",
-  "#EDD5CA",
-  "#BD7182",
-  "#9E5476",
-  "#753C6A",
+  0x5b5280, 0x6074ab, 0x74a0d1, 0x95c3e9, 0xc0e5f3, 0xfaffe0, 0xe3e0d7,
+  0xc3b8b1, 0xa39391, 0x8d7176, 0x6a4c62, 0x4e3161, 0x421e42, 0x612447,
+  0x7a3757, 0x96485b, 0xbd6868, 0xd18b79, 0xdbac8c, 0xe6cfa1, 0xe7ebbc,
+  0xb2dba0, 0x87c293, 0x70a18f, 0x637c8f, 0xb56e75, 0xc98f8f, 0xdfb6ae,
+  0xedd5ca, 0xbd7182, 0x9e5476, 0x753c6a,
 ];
 
 const randomColor = () => colors[Math.floor(Math.random() * colors.length)];
-const initialColor = "#000000";
+const initialColor = 0x000000;
 const initialColorObj = new THREE.Color(initialColor);
 
 const dummy = new THREE.Object3D();
@@ -147,7 +120,7 @@ export const World = ({scene, render}: FieldProps) => {
           inactive = false;
         } else if (
           cells[x][y] != null &&
-          cells[x][y]?.color !== "#" + dummyColor.getHexString().toUpperCase()
+          cells[x][y]?.color !== dummyColor.getHex()
         ) {
           instanceMesh.setColorAt(
             meshIndex,
