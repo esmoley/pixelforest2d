@@ -8,7 +8,7 @@ import {
 } from "./sceneSlice";
 import {Grid} from "./Grid";
 import * as THREE from "three";
-import {type TreeGene, TreeGeneGenerator, Tree} from "./Tree";
+import {TreeGeneGenerator, Tree} from "./Tree";
 
 interface FieldProps {
   scene: THREE.Scene;
@@ -36,17 +36,10 @@ const initialColorObj = new THREE.Color(initialColor);
 const dummy = new THREE.Object3D();
 const cells: Array<Array<Cell | null>> = [];
 
-interface TreeState {
-  key: number;
-  initialCell: Cell;
-  genes: TreeGene[];
-}
-
 export const World = ({scene, render}: FieldProps) => {
   const dispatch = useAppDispatch();
   const width = useAppSelector(x => x.scene.width);
   const height = useAppSelector(x => x.scene.height);
-  const started = useAppSelector(x => x.scene.started);
   const instanceMesh: THREE.InstancedMesh = useMemo(() => {
     const res = new THREE.InstancedMesh(
       new THREE.PlaneGeometry(),
@@ -83,7 +76,7 @@ export const World = ({scene, render}: FieldProps) => {
   const lockX = useAppSelector(x => x.scene.lockX);
   const lockY = useAppSelector(x => x.scene.lockY);
   const [inactivity, setInactivity] = useState(0);
-  const [trees, setTrees] = useState([] as TreeState[]);
+  const [trees, setTrees] = useState([] as Tree[]);
 
   const resetCells = () => {
     for (let x = 0; x < width; x++) {
@@ -112,7 +105,6 @@ export const World = ({scene, render}: FieldProps) => {
     const dummyColor = new THREE.Color(0x000000);
     let inactive = true;
     instanceMesh.getColorAt(meshIndex, dummyColor);
-
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         instanceMesh.getColorAt(meshIndex, dummyColor);
@@ -153,50 +145,44 @@ export const World = ({scene, render}: FieldProps) => {
     if (lifetime !== 0) return;
     const randomX = (): number => Math.floor(Math.random() * width);
     const randomY = (): number => Math.floor(Math.random() * (height / 4));
-    const newTrees: TreeState[] = [];
+    const newTrees: Tree[] = [];
     for (let i = 0; i < 32; i++) {
-      newTrees.push({
-        key: Math.random(),
-        initialCell: {
-          color: randomColor(),
-          x: randomX(),
-          y: randomY(),
-          strength: Math.floor(Math.random() * 32),
-        },
-        genes: new TreeGeneGenerator().generate(),
-      });
+      const initialCell: Cell = {
+        color: randomColor(),
+        x: randomX(),
+        y: randomY(),
+        strength: Math.floor(Math.random() * 32),
+      };
+      newTrees.push(
+        new Tree(initialCell, new TreeGeneGenerator().generate(), cells),
+      );
     }
     setTrees(newTrees);
     resetCells();
     render();
   }, [lifetime === 0]);
 
-  useEffect(() => {
-    if (!started) return;
-    dispatch(setFinished(true));
-  }, [started]);
-
   // update
   useEffect(() => {
+    if (lifetime > 0) {
+      trees.forEach(tree => {
+        // empty tree cells from map
+        tree.actorCells.forEach(
+          itemCell => (cells[itemCell.x][itemCell.y] = null),
+        );
+        tree.grow(translateX, translateY, canGrow);
+        // place cells to the map
+        tree.actorCells.forEach(
+          itemCell => (cells[itemCell.x][itemCell.y] = itemCell),
+        );
+      });
+    }
     if (inactivity > 5 && lifetime >= inactivity) {
       dispatch(setStarted(false));
+      dispatch(setFinished(true));
     }
     paint();
   }, [lifetime]);
 
-  return (
-    <>
-      {trees.map(tree => (
-        <Tree
-          initialCell={tree.initialCell}
-          genes={tree.genes}
-          key={tree.key}
-          canGrow={canGrow}
-          translateX={translateX}
-          translateY={translateY}
-          cells={cells}
-        />
-      ))}
-    </>
-  );
+  return <></>;
 };
