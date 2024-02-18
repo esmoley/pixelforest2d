@@ -8,7 +8,7 @@ import {
 } from "./sceneSlice";
 import {Grid} from "./Grid";
 import * as THREE from "three";
-import {TreeGeneGenerator, Tree} from "./Tree";
+import {TreeGeneGenerator, Tree, type TreeCell} from "./Tree";
 
 interface FieldProps {
   scene: THREE.Scene;
@@ -19,6 +19,7 @@ export interface Cell {
   x: number;
   y: number;
   strength: number;
+  parent?: Tree;
 }
 
 const colors = [
@@ -34,7 +35,7 @@ const initialColor = 0x000000;
 const initialColorObj = new THREE.Color(initialColor);
 
 const dummy = new THREE.Object3D();
-const cells: Array<Array<Cell | null>> = [];
+const cells: Array<Array<TreeCell | null>> = [];
 
 export const World = ({scene, render}: FieldProps) => {
   const dispatch = useAppDispatch();
@@ -75,6 +76,8 @@ export const World = ({scene, render}: FieldProps) => {
   const worldResetRequested = useAppSelector(x => x.scene.worldResetRequested);
   const lockX = useAppSelector(x => x.scene.lockX);
   const lockY = useAppSelector(x => x.scene.lockY);
+  const predators = useAppSelector(x => x.scene.predators);
+
   const [inactivity, setInactivity] = useState(0);
   const [trees, setTrees] = useState([] as Tree[]);
 
@@ -98,7 +101,9 @@ export const World = ({scene, render}: FieldProps) => {
   const canGrow = (x: number, y: number, strength: number) => {
     if (lockY && (y < 0 || y >= height)) return false;
     if (lockX && (x < 0 || x >= width)) return false;
-    return cells[x][y] == null; // || cells[x][y]!.strength<strength;
+    return (
+      cells[x][y] == null || (predators && cells[x][y]!.strength < strength)
+    );
   };
   const paint = (): void => {
     let meshIndex = 0;
@@ -147,11 +152,12 @@ export const World = ({scene, render}: FieldProps) => {
     const randomY = (): number => Math.floor(Math.random() * (height / 4));
     const newTrees: Tree[] = [];
     for (let i = 0; i < 32; i++) {
-      const initialCell: Cell = {
+      const initialCell: TreeCell = {
         color: randomColor(),
         x: randomX(),
         y: randomY(),
         strength: Math.floor(Math.random() * 32),
+        connected: true,
       };
       newTrees.push(
         new Tree(initialCell, new TreeGeneGenerator().generate(), cells),
@@ -172,9 +178,15 @@ export const World = ({scene, render}: FieldProps) => {
         );
         tree.grow(translateX, translateY, canGrow);
         // place cells to the map
-        tree.actorCells.forEach(
-          itemCell => (cells[itemCell.x][itemCell.y] = itemCell),
-        );
+        tree.actorCells.forEach(itemCell => {
+          if (cells[itemCell.x][itemCell.y]?.parent != null) {
+            cells[itemCell.x][itemCell.y]?.parent?.deleteCell(
+              cells[itemCell.x][itemCell.y]!,
+            );
+          }
+          cells[itemCell.x][itemCell.y] = itemCell;
+        });
+        // tree.clearDisconnected(translateX,translateY)
       });
     }
     if (inactivity > 5 && lifetime >= inactivity) {
@@ -182,6 +194,12 @@ export const World = ({scene, render}: FieldProps) => {
       dispatch(setFinished(true));
     }
     paint();
+  }, [lifetime]);
+  useEffect(() => {
+    const newTrees = trees.filter(x => x.actorCells.length > 0);
+    if (newTrees.length < trees.length) {
+      setTrees(newTrees);
+    }
   }, [lifetime]);
 
   return <></>;

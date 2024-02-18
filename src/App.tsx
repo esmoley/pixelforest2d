@@ -3,11 +3,13 @@ import {Scene} from "./features/scene/Scene";
 import {
   setLockX,
   setLockY,
+  setPredators,
   setSpeed,
   setStarted,
   setWorldResetRequested,
 } from "./features/scene/sceneSlice";
 
+const topHeightPx = window.innerWidth > 1664 ? 57 : 107;
 export const App = () => {
   const dispatch = useAppDispatch();
 
@@ -16,25 +18,27 @@ export const App = () => {
   const speed = useAppSelector(x => x.scene.speed);
   const lockX = useAppSelector(x => x.scene.lockX);
   const lockY = useAppSelector(x => x.scene.lockY);
+  const predators = useAppSelector(x => x.scene.predators);
+
   const finished = useAppSelector(x => x.scene.finished);
   return (
     <>
       <div
-        className="flex justify-center pt-2"
+        className="flex justify-center pt-1"
         style={{
-          height: "65px",
+          height: topHeightPx + "px",
           backgroundColor: "#222222",
           color: "aliceblue",
         }}>
         <div className="flex-1">
-          <div className="flex justify-start">
+          <div className="flex justify-start flex-wrap gap-x-2 gap-y-1 ml-1">
             <div
               style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
-              className="m-1 ml-1 cursor-pointer"
+              className="cursor-pointer mt-1"
               onClick={() => dispatch(setLockX(!lockX))}>
               <div
                 className="bg-slate-900 p-1 border-slate-500 border"
-                style={{width: "fit-content", minWidth: "161.88px"}}>
+                style={{width: "fit-content", minWidth: "178.75px"}}>
                 <span className="text-2xl select-none">
                   lock X:{lockX ? "on" : "off"}
                 </span>
@@ -42,11 +46,11 @@ export const App = () => {
             </div>
             <div
               style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
-              className="m-1 ml-2 cursor-pointer"
+              className="cursor-pointer mt-1"
               onClick={() => dispatch(setLockY(!lockY))}>
               <div
                 className="bg-slate-900 p-1 border-slate-500 border"
-                style={{width: "fit-content", minWidth: "161.88px"}}>
+                style={{width: "fit-content", minWidth: "178.75px"}}>
                 <span className="text-2xl select-none">
                   lock Y:{lockY ? "on" : "off"}
                 </span>
@@ -54,7 +58,7 @@ export const App = () => {
             </div>
             <div
               style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
-              className="m-1 ml-2 cursor-pointer"
+              className="cursor-pointer mt-1"
               onClick={() => {
                 if (speed >= 7) {
                   dispatch(setSpeed(1));
@@ -66,6 +70,20 @@ export const App = () => {
                 className="bg-slate-900 p-1 border-slate-500 border"
                 style={{width: "fit-content"}}>
                 <span className="text-2xl select-none">speed:{speed}</span>
+              </div>
+            </div>
+            <div
+              style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
+              className="cursor-pointer mt-1"
+              onClick={() => {
+                dispatch(setPredators(!predators));
+              }}>
+              <div
+                className="bg-slate-900 p-1 border-slate-500 border"
+                style={{width: "fit-content", minWidth: "229.38px"}}>
+                <span className="text-2xl select-none">
+                  predators:{predators ? "on" : "off"}
+                </span>
               </div>
             </div>
           </div>
@@ -159,7 +177,10 @@ export const App = () => {
           </div>
         </div>
       </div>
-      <Scene width={window.innerWidth} height={window.innerHeight - 65} />
+      <Scene
+        width={window.innerWidth}
+        height={window.innerHeight - topHeightPx}
+      />
     </>
   );
 };

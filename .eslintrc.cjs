@@ -8,6 +8,8 @@ module.exports = {
     "standard-with-typescript",
     "plugin:import/typescript",
     "plugin:prettier/recommended",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
   ],
   parser: "@typescript-eslint/parser",
   overrides: [],
@@ -16,11 +18,15 @@ module.exports = {
     sourceType: "module",
     project: "./tsconfig.json",
   },
-  plugins: ["react", "prettier"],
+  plugins: ["react", "prettier", "@typescript-eslint"],
   rules: {
     "@typescript-eslint/triple-slash-reference": "off",
     "react/react-in-jsx-scope": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-non-null-assertion":"off",
+    "@typescript-eslint/strict-boolean-expressions":"off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"]
   },
   settings: {
     react: {

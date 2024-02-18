@@ -13,6 +13,7 @@ export interface SceneState {
   lockY: boolean;
   lockX: boolean;
   finished: boolean;
+  predators: boolean;
 }
 
 const initialState: SceneState = {
@@ -23,9 +24,10 @@ const initialState: SceneState = {
   lastUpdate: 0,
   started: false,
   worldResetRequested: true,
-  lockY: true,
+  lockY: false,
   lockX: false,
   finished: false,
+  predators: true,
 };
 
 export const sceneSlice = createSlice({
@@ -57,6 +59,9 @@ export const sceneSlice = createSlice({
     setFinished: (state, action: PayloadAction<boolean>) => {
       state.finished = action.payload;
     },
+    setPredators: (state, action: PayloadAction<boolean>) => {
+      state.predators = action.payload;
+    },
   },
 });
 
@@ -69,6 +74,7 @@ export const {
   setLockX,
   setLockY,
   setFinished,
+  setPredators,
 } = sceneSlice.actions;
 
 export default sceneSlice.reducer;
