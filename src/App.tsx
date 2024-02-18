@@ -35,22 +35,22 @@ export const App = () => {
               <div
                 className="bg-slate-900 p-1 border-slate-500 border"
                 style={{width: "fit-content", minWidth: "161.88px"}}>
-                <span className="text-2xl">lock X:{lockX ? "on" : "off"}</span>
+                <span className="text-2xl select-none">lock X:{lockX ? "on" : "off"}</span>
               </div>
             </div>
             <div
               style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
-              className="m-1 ml-3 cursor-pointer"
+              className="m-1 ml-2 cursor-pointer"
               onClick={() => dispatch(setLockY(!lockY))}>
               <div
                 className="bg-slate-900 p-1 border-slate-500 border"
                 style={{width: "fit-content", minWidth: "161.88px"}}>
-                <span className="text-2xl">lock Y:{lockY ? "on" : "off"}</span>
+                <span className="text-2xl select-none">lock Y:{lockY ? "on" : "off"}</span>
               </div>
             </div>
             <div
               style={{display: "block", fontFamily: "ReceiptionalReceipt"}}
-              className="m-1 ml-3 cursor-pointer"
+              className="m-1 ml-2 cursor-pointer"
               onClick={() => {
                 if (speed >= 7) {
                   dispatch(setSpeed(1));
@@ -61,7 +61,7 @@ export const App = () => {
               <div
                 className="bg-slate-900 p-1 border-slate-500 border"
                 style={{width: "fit-content"}}>
-                <span className="text-2xl">speed:{speed}</span>
+                <span className="text-2xl select-none">speed:{speed}</span>
               </div>
             </div>
           </div>
