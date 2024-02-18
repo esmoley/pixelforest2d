@@ -1,7 +1,6 @@
 import {useAppDispatch, useAppSelector} from "./app/hooks";
 import {Scene} from "./features/scene/Scene";
 import {
-  setLifetime,
   setLockX,
   setLockY,
   setSpeed,
@@ -17,6 +16,7 @@ export const App = () => {
   const speed = useAppSelector(x => x.scene.speed);
   const lockX = useAppSelector(x => x.scene.lockX);
   const lockY = useAppSelector(x => x.scene.lockY);
+  const finished = useAppSelector(x => x.scene.finished);
   return (
     <>
       <div
@@ -68,7 +68,7 @@ export const App = () => {
         </div>
         <div className="flex-initial">
           <button
-            disabled={started}
+            disabled={started || finished}
             className={
               "px-4 py-2 border border-red-500 text-red-500 transition-all duration-200" +
               (started
@@ -127,8 +127,6 @@ export const App = () => {
             }
             onClick={() => {
               dispatch(setWorldResetRequested(true));
-              dispatch(setStarted(false));
-              dispatch(setLifetime(0));
             }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

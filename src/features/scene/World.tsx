@@ -1,6 +1,11 @@
 import {useEffect, useMemo, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {setStarted, setWorldResetRequested} from "./sceneSlice";
+import {
+  setFinished,
+  setLifetime,
+  setStarted,
+  setWorldResetRequested,
+} from "./sceneSlice";
 import {Grid} from "./Grid";
 import * as THREE from "three";
 import {type TreeGene, TreeGeneGenerator, Tree} from "./Tree";
@@ -67,7 +72,7 @@ export const World = ({scene, render}: FieldProps) => {
   const dispatch = useAppDispatch();
   const width = useAppSelector(x => x.scene.width);
   const height = useAppSelector(x => x.scene.height);
-
+  const started = useAppSelector(x => x.scene.started);
   const instanceMesh: THREE.InstancedMesh = useMemo(() => {
     const res = new THREE.InstancedMesh(
       new THREE.PlaneGeometry(),
@@ -132,6 +137,8 @@ export const World = ({scene, render}: FieldProps) => {
     let meshIndex = 0;
     const dummyColor = new THREE.Color(0x000000);
     let inactive = true;
+    instanceMesh.getColorAt(meshIndex, dummyColor);
+
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         instanceMesh.getColorAt(meshIndex, dummyColor);
@@ -140,7 +147,7 @@ export const World = ({scene, render}: FieldProps) => {
           inactive = false;
         } else if (
           cells[x][y] != null &&
-          cells[x][y]?.color !== dummyColor.getHexString()
+          cells[x][y]?.color !== "#" + dummyColor.getHexString().toUpperCase()
         ) {
           instanceMesh.setColorAt(
             meshIndex,
@@ -153,7 +160,6 @@ export const World = ({scene, render}: FieldProps) => {
     }
     if (inactive) {
       setInactivity(inactivity + 1);
-      console.log(inactivity);
       return;
     }
     if (instanceMesh.instanceColor != null)
@@ -164,6 +170,13 @@ export const World = ({scene, render}: FieldProps) => {
   useEffect(() => {
     if (!worldResetRequested) return;
     setInactivity(0);
+    dispatch(setStarted(false));
+    dispatch(setFinished(false));
+    dispatch(setLifetime(0));
+    dispatch(setWorldResetRequested(false));
+  }, [worldResetRequested]);
+  useEffect(() => {
+    if (lifetime !== 0) return;
     const randomX = (): number => Math.floor(Math.random() * width);
     const randomY = (): number => Math.floor(Math.random() * (height / 4));
     const newTrees = [];
@@ -174,15 +187,19 @@ export const World = ({scene, render}: FieldProps) => {
         genes: new TreeGeneGenerator().generate(),
       });
     }
-    dispatch(setWorldResetRequested(false));
     setTrees(newTrees);
     resetCells();
     render();
-  }, [worldResetRequested]);
+  }, [lifetime === 0]);
+
+  useEffect(() => {
+    if (!started) return;
+    dispatch(setFinished(true));
+  }, [started]);
 
   // update
   useEffect(() => {
-    if (inactivity > 5) {
+    if (inactivity > 5 && lifetime >= inactivity) {
       dispatch(setStarted(false));
     }
     paint();
