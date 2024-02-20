@@ -148,6 +148,7 @@ export const World = ({scene, render}: FieldProps) => {
   }, [worldResetRequested]);
   useEffect(() => {
     if (lifetime !== 0) return;
+    resetCells();
     const randomX = (): number => Math.floor(Math.random() * width);
     const randomY = (): number => Math.floor(Math.random() * (height / 4));
     const newTrees: Tree[] = [];
@@ -164,7 +165,6 @@ export const World = ({scene, render}: FieldProps) => {
       );
     }
     setTrees(newTrees);
-    resetCells();
     render();
   }, [lifetime === 0]);
 
@@ -186,7 +186,7 @@ export const World = ({scene, render}: FieldProps) => {
           }
           cells[itemCell.x][itemCell.y] = itemCell;
         });
-        // tree.clearDisconnected(translateX,translateY)
+        // tree.clearDisconnected(translateX, translateY)
       });
     }
     if (inactivity > 5 && lifetime >= inactivity) {

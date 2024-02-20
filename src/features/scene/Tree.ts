@@ -36,6 +36,7 @@ interface ActiveTreeCell {
 }
 export class Tree {
   activeCells: ActiveTreeCell[];
+  actorCellsMap: Array<Array<TreeCell | null>>;
   actorCells: TreeCell[];
   worldCells: Array<Array<TreeCell | null>>;
   constructor(
@@ -49,6 +50,11 @@ export class Tree {
     treeCell.connected = true;
     this.activeCells = [{cell: treeCell, gene: genes[0]}];
     this.actorCells = [treeCell];
+
+    this.actorCellsMap = new Array(worldCells.length).fill(
+      new Array(worldCells[0].length),
+    );
+    this.actorCellsMap[treeCell.x][treeCell.y] = treeCell;
   }
 
   grow(
@@ -57,32 +63,35 @@ export class Tree {
     canGrow: (x: number, y: number, strength: number) => boolean,
   ) {
     if (this.actorCells.length === 0) return;
-    // empty initial cells
-    const newActorCells = this.actorCells.map(x => x);
 
     // fall if not grounded
-    if (!isGrounded(newActorCells[0], this.worldCells)) {
-      newActorCells.map(c => c.y--);
+    if (!isGrounded(this.actorCells[0], this.worldCells)) {
+      this.actorCells.forEach(c => {
+        this.actorCellsMap[c.x][c.y] = null;
+        this.actorCellsMap[c.x][c.y - 1] = c;
+        c.y--;
+      });
     } else {
       // otherwise grow
       const newActiveCells: ActiveTreeCell[] = [];
       const grow = (geneIndex: number, x: number, y: number) => {
         if (geneIndex < this.genes.length) {
           if (
-            canGrow(x, y, newActorCells[0].strength) &&
-            newActorCells.find(c => c.x === x && c.y === y) == null
+            canGrow(x, y, this.actorCells[0].strength) &&
+            this.actorCells.find(c => c.x === x && c.y === y) == null
           ) {
             const cell: TreeCell = {
-              color: newActorCells[0].color,
+              color: this.actorCells[0].color,
               x,
               y,
-              strength: newActorCells[0].strength,
+              strength: this.actorCells[0].strength,
               parent: this,
               connected: true,
             };
             const gene = this.genes[geneIndex];
             newActiveCells.push({cell, gene});
-            newActorCells.push(cell);
+            this.actorCells.push(cell);
+            this.actorCellsMap[cell.x][cell.y] = cell;
           }
         }
       };
@@ -110,35 +119,28 @@ export class Tree {
       });
       this.activeCells = newActiveCells;
     }
-    this.actorCells = newActorCells;
   }
 
   private removeCell(cell: TreeCell) {
     this.activeCells = this.activeCells.filter(c => c.cell !== cell);
     this.actorCells = this.actorCells.filter(c => c !== cell);
+    this.actorCellsMap[cell.x][cell.y] = null;
   }
 
   private findDisconnectedCells(
     translateX: (x: number) => number,
     translateY: (y: number) => number,
   ) {
-    const cellsMap: Record<number, Record<number, TreeCell | null>> = [];
-
-    this.actorCells.forEach(c => {
-      if (!cellsMap[c.x]) cellsMap[c.x] = [];
-      cellsMap[c.x][c.y] = c;
-    });
-
     const connectedCells: Array<TreeCell | null> = [];
 
     const appendConnectedCells = (fromCell: TreeCell | null) => {
       if (!fromCell || connectedCells.find(c => c === fromCell) != null) return;
       connectedCells.push(fromCell);
-      let cellsMapX = cellsMap[translateX(fromCell.x - 1)];
+      let cellsMapX = this.actorCellsMap[translateX(fromCell.x - 1)];
       if (cellsMapX) appendConnectedCells(cellsMapX[fromCell.y]);
-      cellsMapX = cellsMap[translateX(fromCell.x + 1)];
+      cellsMapX = this.actorCellsMap[translateX(fromCell.x + 1)];
       if (cellsMapX) appendConnectedCells(cellsMapX[fromCell.y]);
-      cellsMapX = cellsMap[fromCell.x];
+      cellsMapX = this.actorCellsMap[fromCell.x];
       if (cellsMapX) {
         appendConnectedCells(cellsMapX[translateY(fromCell.y - 1)]);
         appendConnectedCells(cellsMapX[translateY(fromCell.y + 1)]);

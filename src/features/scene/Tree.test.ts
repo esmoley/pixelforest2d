@@ -1,14 +1,24 @@
 import {assert, describe, test} from "vitest";
 import {Tree, type TreeCell, type TreeGene} from "./Tree";
 
-const translateX = (x: number) => x;
-const translateY = (y: number) => y;
+const width = 10;
+const height = 10;
+const translateX = (x: number) => {
+  while (x < 0) x += width;
+  while (x >= width) x -= width;
+  return x;
+};
+const translateY = (y: number) => {
+  while (y < 0) y += height;
+  while (y >= height) y -= height;
+  return y;
+};
 const canGrow = () => true;
 describe("tree", () => {
   test("thin tree cells should be destroyed when not connected", () => {
     const worldCells: Array<Array<TreeCell | null>> = [];
-    for (let x = 0; x < 10; x++) {
-      worldCells[x] = new Array(10).fill(null);
+    for (let x = 0; x < width; x++) {
+      worldCells[x] = new Array(height).fill(null);
     }
     const position: TreeCell = {
       color: 5,
@@ -38,8 +48,8 @@ describe("tree", () => {
   });
   test("thick tree cells should be destroyed when not connected", () => {
     const worldCells: Array<Array<TreeCell | null>> = [];
-    for (let x = 0; x < 10; x++) {
-      worldCells[x] = new Array(10).fill(null);
+    for (let x = 0; x < width; x++) {
+      worldCells[x] = new Array(height).fill(null);
     }
     const position: TreeCell = {
       color: 5,
@@ -66,7 +76,9 @@ describe("tree", () => {
     // 88
     assert.equal(tree.actorCells.length, 7);
     assert.equal(tree.activeCells.length, 2);
-    let foundCell = tree.actorCells.find(c => c.x === -1 && c.y === 1)!;
+    let foundCell = tree.actorCells.find(
+      c => c.x === translateX(-1) && c.y === 1,
+    )!;
     tree.deleteCell(foundCell);
     // o8
     // o8
